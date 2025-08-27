@@ -1,12 +1,10 @@
 use std::vec::Vec;
 
-use actix_web::{web, Responder, Error, HttpResponse, HttpRequest};
+use actix_web::{HttpRequest, HttpResponse, Responder, body::BoxBody};
 use serde::Serialize;
-use futures::future::{ready, Ready};
 
 use crate::to_do::ItemTypes;
 use crate::to_do::structs::base::Base;
-
 
 /// This struct packages the raw struct fields to package items for JSON serialization.
 ///
@@ -20,11 +18,10 @@ pub struct ToDoItems {
     pub pending_items: Vec<Base>,
     pub done_items: Vec<Base>,
     pub pending_item_count: i8,
-    pub done_item_count: i8
+    pub done_item_count: i8,
 }
 
 impl ToDoItems {
-
     /// This function constructs the ToDoItems struct.
     ///
     /// # Arguments
@@ -38,29 +35,29 @@ impl ToDoItems {
 
         for item in input_items {
             match item {
-                ItemTypes::Pending(packed) => pending_array_buffer.push(
-                    packed.super_struct),
-                ItemTypes::Done(packed) => done_array_buffer.push(
-                    packed.super_struct)
+                ItemTypes::Pending(packed) => pending_array_buffer.push(packed.super_struct),
+                ItemTypes::Done(packed) => done_array_buffer.push(packed.super_struct),
             }
         }
         let done_count: i8 = done_array_buffer.len() as i8;
         let pending_count: i8 = pending_array_buffer.len() as i8;
-        return ToDoItems{
-            pending_items: pending_array_buffer, done_item_count: done_count,
-            pending_item_count: pending_count, done_items: done_array_buffer
+        ToDoItems {
+            pending_items: pending_array_buffer,
+            done_item_count: done_count,
+            pending_item_count: pending_count,
+            done_items: done_array_buffer,
         }
     }
 }
 
 impl Responder for ToDoItems {
-    type Error = Error;
-    type Future = Ready<Result<HttpResponse, Error>>;
+    type Body = BoxBody; // ✅ wajib di Actix Web 4
 
-    fn respond_to(self, _req: &HttpRequest) -> Self::Future {
+    fn respond_to(self, _req: &HttpRequest) -> HttpResponse<Self::Body> {
         let body = serde_json::to_string(&self).unwrap();
-        ready(Ok(HttpResponse::Ok()
+
+        HttpResponse::Ok()
             .content_type("application/json")
-            .body(body)))
+            .body(body)
     }
 }
