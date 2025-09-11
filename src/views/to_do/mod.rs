@@ -17,6 +17,7 @@ pub fn item_factory(app: &mut web::ServiceConfig) {
     // define the path struct
     let base_path: Path = Path {
         prefix: String::from("/item"),
+        backend: true
     };
     // define the routes for the app
     app.route(

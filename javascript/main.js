@@ -1,3 +1,7 @@
+if (localStorage.getItem("user-token") == null) {
+  window.location.replace(document.location.origin + "/login");
+}
+
 /**
  * Renders the to do items from the backend into a HTML div.
  *
@@ -70,9 +74,9 @@ function apiCall(url, method) {
       )["pending_item_count"];
     }
   });
-  xhr.open(method, url);
+  xhr.open(method, "/api/v1" + url);
   xhr.setRequestHeader("content-type", "application/json");
-  xhr.setRequestHeader("user-token", "token");
+  xhr.setRequestHeader("user-token", localStorage.getItem("user-token"));
   return xhr;
 }
 
@@ -123,4 +127,3 @@ function createItem() {
   call.send();
   document.getElementById("name").value = null;
 }
-
